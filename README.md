@@ -7,7 +7,7 @@ This little tool gives you an easy way to organize your page (or custom post typ
 First, install the package:
 
 ```bash
-composer require livy/plumbing-template
+composer require livy/plumbing-templates
 ```
 
 Then call the tool like this, somewhere where it'll be run early (i.e. `functions.php`):
