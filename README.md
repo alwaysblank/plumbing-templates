@@ -1,4 +1,4 @@
-# Template Plumbing
+# Template 👩‍🔧
 
 This little tool gives you an easy way to organize your page (or custom post type) templates better. By "templates" I mean the templates you can select from the "Templates" dropdown in the editor.
 
