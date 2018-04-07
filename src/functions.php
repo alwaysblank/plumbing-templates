@@ -6,7 +6,7 @@ use Symfony\Component\Finder\Finder;
 
 function register_template_directory(string $path, $post_type = 'page')
 {
-    add_filter("theme_{$post_type}_templates", function($templates) use ($path, $post_type) {
+    add_filter("theme_{$post_type}_templates", function ($templates) use ($path, $post_type) {
         return array_merge($templates, set_template_directory($path, $post_type));
     });
 }
@@ -14,7 +14,7 @@ function register_template_directory(string $path, $post_type = 'page')
 function set_template_directory(string $path, string $post_type = 'page')
 {
     $checked_path = check_path_segment($path);
-    $full_path = realpath(get_wordpress_template_directory($post_type) . DIRECTORY_SEPARATOR . $checked_path) ?: '';
+    $full_path    = get_wordpress_template_directory($post_type) . DIRECTORY_SEPARATOR . $checked_path ?: '';
 
     // Make sure you're not trying to go somewhere weird
     if (0 !== strpos($full_path, get_wordpress_template_directory($post_type))) {
@@ -25,7 +25,7 @@ function set_template_directory(string $path, string $post_type = 'page')
 
     if (is_dir($full_path)) {
         $inline_identifier = get_inline_identifier($post_type);
-        $finder = new Finder();
+        $finder            = new Finder();
         $finder->files()->in($full_path)->name(get_file_extenstion($post_type));
         foreach ($finder as $file) {
 
