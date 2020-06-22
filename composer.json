@@ -13,6 +13,6 @@
     },
     "require": {
         "php": ">=7.0",
-        "symfony/finder": "^4.0"
+        "symfony/finder": "^5"
     }
 }
