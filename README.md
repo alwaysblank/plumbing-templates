@@ -23,6 +23,29 @@ By default, the plugin assumes you're changing the template for the `page` post 
 Livy\Plumbing\Templates\register_template_directory('event-templates', 'event');
 ```
 
+Usually, you'll want to wrap this in an action call to make sure it runs early enough, i.e.:
+
+```
+add_action('init', function () {
+    Livy\Plumbing\Templates\register_template_directory('event-templates', 'event');
+});
+```
+
+### Sage Starter Theme
+
+If you're using the Sage starter theme, your "theme" directory is in a little different location than usual. Fortunately, there's an easy way to address this with a filter:
+
+```php
+add_action('init', function () {
+    add_filter('template-dir/theme-directory', function ($dir) {
+        return get_theme_file_path('/resources/views');
+    });
+    register_template_directory('pages');
+});
+```
+
+
+
 ## Limitations
 
 The tool looks in your template directory (i.e. the result of `get_template_directory()`) when looking for the directory you specify. If will silently fail if it can't find the directory, or if you try to do something clever (i.e. `../../../usr/bin`) for your template path.
