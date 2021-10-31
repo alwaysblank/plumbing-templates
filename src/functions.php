@@ -58,11 +58,10 @@ function compile_template_list( array $args ) : array {
 	$settings = resolve_arguments( $args, $defaults );
 
 	$settings['template_root'] = trailingslashit( $settings['template_root'] );
+	$settings['parent_template_root'] = trailingslashit( $settings['parent_template_root'] );
 
 	// We want to make sure we won't have double slashes when we concatenate with template_root.
-	$settings['paths'] = array_map( function ( $path ) {
-		return trailingslashit( rtrim( $path, DIRECTORY_SEPARATOR ) );
-	}, $settings['paths'] );
+	$settings['paths'] = array_map( __NAMESPACE__ . '\\clean_path_dir_segment', $settings['paths'] );
 
 	// Only allow paths that exist.
 	$settings['paths'] = array_filter( $settings['paths'], function ( $path ) use ( $settings ) {
@@ -83,15 +82,34 @@ function compile_template_list( array $args ) : array {
 
 	$settings = apply_filters( 'template-dir/resolved-compile-arguments', $settings, $args );
 
-	$templates = [];
-	foreach ( get_finder( $settings ) as $file ) {
-		$name_matches = get_match_in_file( $file->getRealPath() ?: '', $settings['name_regex'] );
-		if ( isset( $name_matches[1] ) ) {
-			$templates[ rebase_path( $file->getRealPath(), $settings['template_root'] ) ] = $name_matches[1];
-		}
+	$templates = get_templates_from_finder( $settings );
+
+	if ( $settings['template_root'] !== $settings['parent_template_root'] ) {
+		$parent_args = $settings;
+		$parent_args['template_root'] = $settings['parent_template_root'];
+		$templates = array_merge( get_templates_from_finder( $parent_args ), $templates );
 	}
 
 	return apply_filters( 'template-dir/collected-templates', $templates, $settings, $args );
+}
+
+/**
+ * Get a list of templates based on a set of $args.
+ *
+ * @param array $args
+ *
+ * @return array
+ */
+function get_templates_from_finder( array $args ) : array {
+	$templates = [];
+	foreach ( get_finder( $args ) as $file ) {
+		$name_matches = get_match_in_file( $file->getRealPath() ?: '', $args['name_regex'] );
+		if ( isset( $name_matches[1] ) ) {
+			$templates[ rebase_path( $file->getRealPath(), $args['template_root'] ) ] = $name_matches[1];
+		}
+	}
+
+	return $templates;
 }
 
 /**
@@ -112,7 +130,8 @@ function get_finder( array $args ) : Finder {
 	       ->contains( $args['contains'] )
 	       ->sortByName();
 
-	if ( version_compare( $GLOBALS['wp_version'], '4.7', '>=' ) && $args['post_type'] !== 'page' ) {
+	if ( version_compare( $GLOBALS['wp_version'], '4.7', '>=' ) &&
+	     ( $args['post_type'] ?? '' ) !== 'page' ) {
 		$finder->contains( $args['post_type_regex'] );
 	}
 
@@ -219,6 +238,7 @@ function get_default_args() : array {
 		'post_type' => 'page',
 		'filename' => '*.php',
 		'template_root' => get_stylesheet_directory(),
+		'parent_template_root' => get_template_directory(),
 		'contains' => 'Template Name:',
 		'name_regex' => '/Template Name: ?(.+)/',
 		'post_type_regex' => '/Template Post Type:.*%post_type%(?=(?:,|$))/m',
