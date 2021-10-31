@@ -222,5 +222,5 @@ function get_default_args() : array {
 		'contains' => 'Template Name:',
 		'name_regex' => '/Template Name: ?(.+)/',
 		'post_type_regex' => '/Template Post Type:.*%post_type%(?=(?:,|$))/m',
-	];
+	] );
 }
