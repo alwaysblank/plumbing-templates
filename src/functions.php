@@ -87,8 +87,7 @@ function compile_template_list( array $args ) : array {
 	if ( $settings['template_root'] !== $settings['parent_template_root'] ) {
 		$parent_args = $settings;
 		$parent_args['template_root'] = $settings['parent_template_root'];
-		$parent_templates = get_templates_from_finder( $parent_args );
-		$templates = array_merge( $parent_templates, $templates );
+		$templates = array_merge( get_templates_from_finder( $parent_args ), $templates );
 	}
 
 	return apply_filters( 'template-dir/collected-templates', $templates, $settings, $args );
