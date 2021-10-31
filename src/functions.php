@@ -53,7 +53,7 @@ function setup_template_location( array $args ) : void {
  * @return array
  */
 function compile_template_list( array $args ) : array {
-	$defaults = apply_filters( 'template-dir/compile-arguments', get_default_args(), $args );
+	$defaults = apply_filters( 'livy.plumbing.templates.compile.ingest', get_default_args(), $args );
 
 	$settings = resolve_arguments( $args, $defaults );
 
@@ -80,7 +80,7 @@ function compile_template_list( array $args ) : array {
 		$settings['post_type_regex']
 	);
 
-	$settings = apply_filters( 'template-dir/resolved-compile-arguments', $settings, $args );
+	$settings = apply_filters( 'livy.plumbing.templates.compile.ready', $settings, $args );
 
 	$templates = get_templates_from_finder( $settings );
 
@@ -90,7 +90,7 @@ function compile_template_list( array $args ) : array {
 		$templates = array_merge( get_templates_from_finder( $parent_args ), $templates );
 	}
 
-	return apply_filters( 'template-dir/collected-templates', $templates, $settings, $args );
+	return apply_filters( 'livy.plumbing.templates.compile.result', $templates, $settings, $args );
 }
 
 /**
@@ -166,7 +166,7 @@ function clean_path_dir_segment( $segment, bool $trailing_slash = true ) : strin
  * @return array
  */
 function resolve_arguments( array $args, array $defaults ) : array {
-	return apply_filters( 'template-dir/resolve-arguments', array_merge( $defaults, $args ), $args, $defaults );
+	return apply_filters( 'livy.plumbing.templates.resolve_arguments', array_merge( $defaults, $args ), $args, $defaults );
 }
 
 /**
@@ -233,7 +233,7 @@ function get_match_in_file( string $path, string $regex ) : array {
  * @return array
  */
 function get_default_args() : array {
-	return apply_filters( 'template-dir/default-args', [
+	return apply_filters( 'livy.plumbing.templates.args.default', [
 		'paths' => [],
 		'post_type' => 'page',
 		'filename' => '*.php',
