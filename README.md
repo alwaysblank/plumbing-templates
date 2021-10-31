@@ -27,7 +27,7 @@ Livy\Plumbing\Templates\register_template_directory('event-templates', 'event');
 
 Usually, you'll want to wrap this in an action call to make sure it runs early enough, i.e.:
 
-```
+```php
 add_action('init', function () {
     Livy\Plumbing\Templates\register_template_directory('event-templates', 'event');
 });
