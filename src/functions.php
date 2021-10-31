@@ -5,10 +5,15 @@ namespace Livy\Plumbing\Templates;
 use Symfony\Component\Finder\Finder;
 
 /**
+ * Register a single path for a post type.
+ *
+ * This is a simplistic implementation and allows little customization.
+ * It is recommended to used setup_template_location() instead.
+ *
  * @param array|string $path
  * @param string $post_type
  */
-function register_template_directory( $path, string $post_type = 'page' ) {
+function register_template_directory( $path, string $post_type = 'page' ) : void {
 	$paths = is_string( $path ) ? [ $path ] : $path;
 
 	$args = [
@@ -22,7 +27,14 @@ function register_template_directory( $path, string $post_type = 'page' ) {
 	} );
 }
 
-function setup_template_location( array $args ) {
+/**
+ * Set up a template location based on an argument array.
+ *
+ * The array *must* contain at least the keys `post_type` and `paths`.
+ *
+ * @param array $args
+ */
+function setup_template_location( array $args ) : void {
 	if ( ! isset( $args['post_type'] ) || ! isset( $args['paths'] ) ) {
 		// Can't do anything without these.
 		return;
@@ -33,16 +45,15 @@ function setup_template_location( array $args ) {
 	} );
 }
 
+/**
+ * Generate a list of possible templates.
+ *
+ * @param array $args
+ *
+ * @return array
+ */
 function compile_template_list( array $args ) : array {
-	$defaults = apply_filters( 'template-dir/default-compile-arguments', [
-		'paths' => [],
-		'post_type' => 'page',
-		'filename' => '*.php',
-		'template_root' => get_stylesheet_directory(),
-		'contains' => 'Template Name:',
-		'name_regex' => '/Template Name: ?(.+)/',
-		'post_type_regex' => '/Template Post Type:.*%post_type%(?=(?:,|$))/m',
-	], $args );
+	$defaults = apply_filters( 'template-dir/compile-arguments', get_default_args(), $args );
 
 	$settings = resolve_arguments( $args, $defaults );
 
@@ -75,7 +86,6 @@ function compile_template_list( array $args ) : array {
 	$templates = [];
 	foreach ( get_finder( $settings ) as $file ) {
 		$name_matches = get_match_in_file( $file->getRealPath() ?: '', $settings['name_regex'] );
-		preg_match( get_relative_filename_regex( $settings ), $file->getRealPath(), $path_matches );
 		if ( isset( $name_matches[1] ) ) {
 			$templates[ rebase_path( $file->getRealPath(), $settings['template_root'] ) ] = $name_matches[1];
 		}
@@ -84,6 +94,13 @@ function compile_template_list( array $args ) : array {
 	return apply_filters( 'template-dir/collected-templates', $templates, $settings, $args );
 }
 
+/**
+ * Get an instance of Finder that has found relevant templates.
+ *
+ * @param array $args
+ *
+ * @return Finder
+ */
 function get_finder( array $args ) : Finder {
 	$finder = new Finder();
 	$finder->ignoreUnreadableDirs();
@@ -102,7 +119,16 @@ function get_finder( array $args ) : Finder {
 	return $finder;
 }
 
-function clean_path_dir_segment( $segment, $trailing_slash = true ) : string {
+/**
+ * Make sure $segment does *not* start with a directory separator.
+ * If $trailing_slash is true, make sure $segment ends with a directory separator.
+ *
+ * @param $segment
+ * @param bool $trailing_slash
+ *
+ * @return string
+ */
+function clean_path_dir_segment( $segment, bool $trailing_slash = true ) : string {
 	$segment = trim( $segment );
 	$segment = ltrim( $segment, DIRECTORY_SEPARATOR );
 	if ( $trailing_slash ) {
@@ -112,18 +138,34 @@ function clean_path_dir_segment( $segment, $trailing_slash = true ) : string {
 	return $segment;
 }
 
+/**
+ * Combine arguments with defaults.
+ *
+ * @param array $args
+ * @param array $defaults
+ *
+ * @return array
+ */
 function resolve_arguments( array $args, array $defaults ) : array {
 	return apply_filters( 'template-dir/resolve-arguments', array_merge( $defaults, $args ), $args, $defaults );
 }
 
-function get_relative_filename_regex( $args ) : string {
-	$paths = join( '|', array_map( function ( $path ) {
-		return preg_quote( $path, '/' );
-	}, $args['paths'] ) );
-
-	return sprintf( '/(%s)(.*)/', $paths );
-}
-
+/**
+ * Remove $base and any preceding characters from $path.
+ *
+ * Ex.
+ * ```
+ * $path = '/path/to/a/directory/and/file';
+ * $base = '/to/a';
+ * rebase_path( $path, $base );
+ * // directory/and/file
+ * ```
+ *
+ * @param string $path
+ * @param string $base
+ *
+ * @return string
+ */
 function rebase_path( string $path, string $base ) : string {
 	$strpos = strpos( $path, $base );
 	if ( $strpos === false ) {
@@ -136,6 +178,16 @@ function rebase_path( string $path, string $base ) : string {
 	return clean_path_dir_segment( $rebased, false );
 }
 
+/**
+ * Return first match(es) for $regex in $path.
+ *
+ * Goes line-by-line to conserve memory on large files.
+ *
+ * @param string $path
+ * @param string $regex
+ *
+ * @return array
+ */
 function get_match_in_file( string $path, string $regex ) : array {
 	$results = [];
 	if ( $path === '' || ! file_exists( $path ) ) {
@@ -154,4 +206,21 @@ function get_match_in_file( string $path, string $regex ) : array {
 	fclose( $opened_file );
 
 	return $results;
+}
+
+/**
+ * Return the default arguments for template generation.
+ *
+ * @return array
+ */
+function get_default_args() : array {
+	return apply_filters( 'template-dir/default-args', [
+		'paths' => [],
+		'post_type' => 'page',
+		'filename' => '*.php',
+		'template_root' => get_stylesheet_directory(),
+		'contains' => 'Template Name:',
+		'name_regex' => '/Template Name: ?(.+)/',
+		'post_type_regex' => '/Template Post Type:.*%post_type%(?=(?:,|$))/m',
+	];
 }
