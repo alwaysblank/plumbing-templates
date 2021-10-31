@@ -62,4 +62,4 @@ The following is a list of all the options this package understands.
 
 ### Acorn and Sage
 
-If you use the [v10+ of the Sage starter theme](https://github.com/roots/sage) or are using [Acorn](https://github.com/roots/acorn) in some other capacity, you know that your templates are stored in a slightly non-standard location. Fortunately this package [helpfully alters the defaults](https://github.com/alwaysblank/plumbing-templates/blob/46ba4b3bd4db640d3d1ad063e74d8dadf84878cf/src/filters.php#L11-L16) if it detects that you're using Acorn.
+If you use the [v10+ of the Sage starter theme](https://github.com/roots/sage) or are using [Acorn](https://github.com/roots/acorn) in some other capacity, you know that your templates are stored in a slightly non-standard location. Fortunately this package [helpfully alters the defaults](https://github.com/alwaysblank/plumbing-templates/blob/56d06ec8ba7fa9dae52a047ef5893bc25ebdd81f/src/filters.php#L11-L17) if it detects that you're using Acorn.
