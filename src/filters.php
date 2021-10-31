@@ -13,7 +13,7 @@ if ( function_exists( 'add_filter' ) ) {
 	 * can predict, so lets set that up right now. It's hooked up a bit early
 	 * to make it easier to unhook if necessary.
 	 */
-	add_filter( 'template-dir/default-args', __NAMESPACE__ . '\\set_acorn_defaults', 9 );
+	add_filter( 'livy.plumbing.templates.args.default', __NAMESPACE__ . '\\set_acorn_defaults', 9 );
 }
 
 /**
